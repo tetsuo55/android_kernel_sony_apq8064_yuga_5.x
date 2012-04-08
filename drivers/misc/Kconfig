@@ -760,6 +760,12 @@ config SOMC_ISDBT_TUNER
 	help
 	  Select this module to enable SOMC ISDB-T Tuner Driver.
 
+config FSYNC_CONTROL
+        bool "Support for FSync Control"
+        default y
+        help
+          Say Y here to enable FSync Control
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
