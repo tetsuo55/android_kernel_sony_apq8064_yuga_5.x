@@ -20,6 +20,15 @@
 #include <linux/mutex.h>
 #include <linux/pm_runtime.h>
 
+#define BL_USERSPACE_MIN	10
+#define LOW_BR_HACK_VAL		1
+
+/*
+ * Backlight Hack is enabled by default to deal with sub-optimal userspace
+ * brightness mapping.
+ */
+static unsigned int lm3533_bl_hack = 1;
+
 static int autosuspend_delay_ms = 100;
 module_param(autosuspend_delay_ms, int, S_IRUGO);
 
@@ -701,10 +710,20 @@ static void lm3533_led_brightness(struct led_classdev *led_cdev,
 	int rc;
 	u8 bena;
 
-	if (value <= LED_OFF)
-		value = 0;
-	else if (value >= LED_FULL)
-		value = 255;
+	if (value < LED_OFF)
+		value = LED_OFF;
+	else if (value > LED_FULL)
+		value = LED_FULL;
+
+	/*
+	 * The lowest userspace brightness value for the LM3533_CBNKA-Bank
+	 * is 10. If we hit this lower-limit the bl_hack will reduce the
+	 * backlight brightness to the lowest possible value (1).
+	 */
+	if (lm3533_bl_hack) {
+		if (value == BL_USERSPACE_MIN)
+			value = LOW_BR_HACK_VAL;
+	}
 
 	dev_dbg(dev, "%s: brightness %d -> %d, als %d\n", led_cdev->name,
 			intf->brightness, value, intf->als);
@@ -1564,6 +1583,28 @@ static ssize_t lm3533_reset_store(struct device *dev,
 	return rc ? rc : count;
 }
 
+static ssize_t lm3533_bl_hack_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%u\n", lm3533_bl_hack);
+}
+
+static ssize_t lm3533_bl_hack_store(struct device *dev,
+	struct device_attribute *dev_attr, const char *buf, size_t count)
+{
+	unsigned long val;
+	int ret;
+
+	ret = kstrtoul(buf, 10, &val);
+
+	if (ret || val > 1)
+		return -EINVAL;
+
+	lm3533_bl_hack = val;
+
+	return count;
+}
+
 static const DEVICE_ATTR(reset, S_IWUSR, NULL, lm3533_reset_store);
 static const DEVICE_ATTR(als_current, S_IWUSR | S_IRUSR,
 		lm3533_als_current_show, lm3533_als_current_store);
@@ -1584,6 +1625,7 @@ static const DEVICE_ATTR(als1_curve, S_IWUSR, NULL, lm3533_als1_store);
 static const DEVICE_ATTR(als2_curve, S_IWUSR, NULL, lm3533_als2_store);
 static const DEVICE_ATTR(als3_curve, S_IWUSR, NULL, lm3533_als3_store);
 static const DEVICE_ATTR(sync_lvbanks, S_IWUSR, NULL, lm3533_lvbnak_sync_store);
+static const DEVICE_ATTR(bl_hack, S_IRUGO | S_IWUSR, lm3533_bl_hack_show, lm3533_bl_hack_store);
 
 static const struct attribute *lm3533_attrs[] = {
 	&dev_attr_reset.attr,
@@ -1599,6 +1641,7 @@ static const struct attribute *lm3533_attrs[] = {
 	&dev_attr_rt_rate_ms.attr,
 	&dev_attr_start_shdn_ms.attr,
 	&dev_attr_sync_lvbanks.attr,
+	&dev_attr_bl_hack.attr,
 	NULL,
 };
 
