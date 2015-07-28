@@ -54,7 +54,7 @@
 #elif defined CONFIG_MSM_SLEEP_STATS_DEVICE
 #define ADRENO_DEFAULT_PWRSCALE_POLICY  (&kgsl_pwrscale_policy_idlestats)
 #else
-#define ADRENO_DEFAULT_PWRSCALE_POLICY  NULL
+#define ADRENO_DEFAULT_PWRSCALE_POLICY  (&kgsl_pwrscale_policy_conservative)
 #endif
 
 #define ADRENO_ISTORE_START 0x5000 /* Istore offset */
