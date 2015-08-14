@@ -17,6 +17,8 @@
  *
  */
 
+#define MAX_CPUS	CONFIG_NR_CPUS
+
 #include <linux/earlysuspend.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -60,11 +62,11 @@ struct cpu_freq {
 
 static DEFINE_PER_CPU(struct cpu_freq, cpu_freq_info);
 
-static unsigned int lower_limit_freq[CONFIG_NR_CPUS];
+static unsigned int lower_limit_freq[MAX_CPUS];
 
 void set_cpu_min_lock(unsigned int cpu, int freq)
 {
-	if (cpu >= 0 && cpu < CONFIG_NR_CPUS) {
+	if (cpu >= 0 && cpu < MAX_CPUS) {
 		if (freq <= CONFIG_MSM_CPU_FREQ_MIN ||
 			freq > CONFIG_MSM_CPU_FREQ_MAX)
 			lower_limit_freq[cpu] = 0;
@@ -94,7 +96,7 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq)
 
 		if (new_freq < policy->min)
 			new_freq = policy->min;
-		if (new_freq > policy->max)
+		else if (new_freq > policy->max)
 			new_freq = policy->max;
 	}
 
