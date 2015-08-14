@@ -1032,4 +1032,10 @@ config TOUCHSCREEN_SWEEP2SLEEP
 	tristate "Sweep2Sleep for touchscreens"
 	default y
 
+config ALUCARD_TOUCHSCREEN_BOOST
+	tristate "Touchscreen boost"
+	default y
+	help
+	  Alucard touchscreen boost.
+
 endif
