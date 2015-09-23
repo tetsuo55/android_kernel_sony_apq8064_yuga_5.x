@@ -25,7 +25,11 @@
 #include <linux/ctype.h>
 #include <linux/firmware.h>
 #include <linux/slab.h>
+#ifndef CONFIG_MACH_SONY_ODIN
 #include <linux/mfd/pm8xxx/vibrator.h>
+#else
+#include <linux/vibrator-lc898300.h>
+#endif
 #ifdef CONFIG_DEBUG_FS
 #include <linux/debugfs.h>
 #endif
@@ -1839,7 +1843,11 @@ static int synaptics_clearpad_handle_gesture(struct synaptics_clearpad *this)
 		rc = evgen_execute(this->input, this->evgen_blocks,
 					"double_tap");
 		if (wg_vib_enable)
-			vibrate(wg_vib_strength);
+#ifndef CONFIG_MACH_SONY_ODIN
+			pm8xxx_vibrate(wg_vib_strength);
+#else
+			lc898300_vibrate(wg_vib_strength);
+#endif
 		break;
 	case XY_LPWG_STATUS_SWIPE_DETECTED:
 		rc = evgen_execute(this->input, this->evgen_blocks,
@@ -1849,7 +1857,11 @@ static int synaptics_clearpad_handle_gesture(struct synaptics_clearpad *this)
 		rc = evgen_execute(this->input, this->evgen_blocks,
 					"two_swipe");
 		if (wg_vib_enable)
-			vibrate(wg_vib_strength);
+#ifndef CONFIG_MACH_SONY_ODIN
+			pm8xxx_vibrate(wg_vib_strength);
+#else
+			lc898300_vibrate(wg_vib_strength);
+#endif
 		break;
 	default:
 		rc = -EINVAL;

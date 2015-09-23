@@ -217,7 +217,7 @@ static void pm8xxx_vib_update(struct work_struct *work)
 	pm8xxx_vib_set(vib, vib->state);
 }
 
-void vibrate(int time)
+void pm8xxx_vibrate(int time)
 {
 	pm8xxx_vib_enable(&vib_dev->timed_dev, time);
 }

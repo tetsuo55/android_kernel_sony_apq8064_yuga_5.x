@@ -60,6 +60,8 @@ struct lc898300_data {
 	wait_queue_head_t resume_queue;
 };
 
+static struct lc898300_data *vib_data;
+
 static const struct i2c_device_id lc898300_id[] = {
 	{ LC898300_I2C_NAME, 0 },
 	{ }
@@ -276,6 +278,11 @@ static void lc898300_vib_enable(struct timed_output_dev *dev, int value)
 	else
 		request_vib_off(data);
 	mutex_unlock(&data->lock);
+}
+
+void lc898300_vibrate(int time)
+{
+	lc898300_vib_enable(&vib_data->timed_dev, time);
 }
 
 static int lc898300_vib_get_time(struct timed_output_dev *dev)
@@ -587,6 +594,8 @@ static int __devinit lc898300_probe(struct i2c_client *client,
 
 	schedule_delayed_work(&data->resume_work,
 		msecs_to_jiffies(LC898300_RESUME_DELAY));
+
+	vib_data = data;
 
 	return rc;
 error_add_sysfs:

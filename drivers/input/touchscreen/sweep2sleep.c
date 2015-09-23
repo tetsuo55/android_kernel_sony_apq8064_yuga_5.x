@@ -27,7 +27,11 @@
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include <linux/input.h>
+#ifndef CONFIG_MACH_SONY_ODIN
 #include <linux/mfd/pm8xxx/vibrator.h>
+#else
+#include <linux/vibrator-lc898300.h>
+#endif
 
 #define DRIVER_AUTHOR "Dennis Rassmann <showp1984@gmail.com>"
 #define DRIVER_DESCRIPTION "Sweep2sleep for almost any device"
@@ -90,7 +94,11 @@ static DECLARE_WORK(sweep2sleep_presspwr_work, sweep2sleep_presspwr);
 static void sweep2sleep_pwrswitch(void)
 {
 	if (vib_enabled)
-		vibrate(vib_trigger_time);
+#ifndef CONFIG_MACH_SONY_ODIN
+		pm8xxx_vibrate(vib_trigger_time);
+#else
+		lc898300_vibrate(vib_trigger_time);
+#endif
 	schedule_work(&sweep2sleep_presspwr_work);
 }
 

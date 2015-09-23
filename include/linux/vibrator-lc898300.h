@@ -114,4 +114,6 @@ struct lc898300_platform_data {
 	struct lc898300_vib_cmd *vib_cmd_info;
 };
 
+void lc898300_vibrate(int time);
+
 #endif /* __LINUX_lc898300_H */
